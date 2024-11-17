@@ -1,0 +1,92 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.table-container {
+  overflow-x: auto;
+  max-width: 100%;
+  display: none;
+}
+
+.table-content {
+  display: none;
+}
+
+.print-title {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .view-ros-con {
+    display: none;
+  }
+
+  .print-container,
+  .print-container * {
+    visibility: visible;
+  }
+
+  .print-title {
+    display: block;
+  }
+
+  .print-container {
+    position: relative;
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .print-button {
+    display: none;
+  }
+
+  .table-content {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    overflow-x: visible;
+    border-right: 1 px solid;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: 8px;
+    border: 1px solid #000;
+    text-align: left;
+    word-wrap: break-word;
+  }
+
+  .table-container {
+    display: block;
+    overflow-x: visible;
+  }
+
+  .side-bar {
+    min-height: 80vh;
+  }
+}
+
+.title {
+  font-family: "Caprasimo", cursive;
+}
