@@ -5,13 +5,13 @@ import { HiPencilAlt } from "react-icons/hi";
 import { IoIosPrint } from "react-icons/io";
 import { MdDelete } from "react-icons/md";
 import { Link } from "react-router-dom";
-import { useGetMyProfileQuery } from "../../redux/features/user/userApi";
 import { columnOptions } from "../../utils/utils";
 import ExportButton from "../buttons/ExportButton";
 import LoadingTableSkeleton from "../loading/LoadingTableSkeleton";
 import DeleteConfirmModal from "../modal/DeleteConfirmationModal";
 import TablePagination from "../pagination/TablePagination";
 import PrintRoster from "../printRoster/PrintRoster";
+import ImagePreviewModal from "../modal/ImagePreviewModal";
 
 const TimeSheetTable = ({
   filteredData,
@@ -27,9 +27,8 @@ const TimeSheetTable = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
-
-  const { data: userData } = useGetMyProfileQuery();
-  const isLoggedIn = userData?.data?.email;
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [receiptImage, setReceiptImage] = useState("");
 
   // Filter the header options to show only selected columns
   const customizeHeaderOptions = columnOptions;
@@ -101,18 +100,11 @@ const TimeSheetTable = ({
                 <ExportButton
                   headerData={customizeHeaderOptions}
                   data={filteredData}
-                  isLoggedIn={isLoggedIn}
                 />
                 <button
                   onClick={() => handlePrint()}
-                  disabled={!isLoggedIn}
-                  title={!isLoggedIn ? "Login to print roster" : "Print"}
-                  className={`bg-primary text-white px-5 py-[6px] text-lg rounded-md 
-                  ${
-                    isLoggedIn
-                      ? "hover:opacity-90"
-                      : "opacity-50 cursor-not-allowed"
-                  }`}
+                  title={"Print"}
+                  className={`bg-primary text-white px-5 py-[6px] text-lg rounded-md hover:opacity-90`}
                 >
                   <IoIosPrint />
                 </button>
@@ -167,16 +159,36 @@ const TimeSheetTable = ({
                           exists && (
                             <td
                               key={key}
-                              className={`py-2 text-left border-gray-400 text-xs md:text-sm px-1 border-r text-nowrap last:border-r-0`}
+                              onClick={() => {
+                                if (key !== "tripReceipt") {
+                                  return;
+                                }
+                                if (item[key]) {
+                                  setImageModalOpen(true);
+                                  setReceiptImage(item[key]);
+                                }
+                              }}
+                              // i want to use 2 condition in the class like key === tripReceipt && item[key] ? "cursor-pointer" : ""
+                              className={`py-2 text-left border-gray-400 text-xs md:text-sm px-1 border-r text-nowrap last:border-r-0 ${
+                                key === "tripReceipt" && item[key]
+                                  ? "cursor-pointer"
+                                  : ""
+                              }`}
                             >
-                              {item[key]}
+                              {key === "tripReceipt" && item[key] ? (
+                                <p className="text-blue-500 px-2">
+                                  View Receipt
+                                </p>
+                              ) : (
+                                item[key]
+                              )}
                             </td>
                           )
                         );
                       })}
                       <td className="flex justify-evenly items-center py-2 text-left border-gray-400 text-xs md:text-sm px-1 border-r last:border-r-0">
                         <Link
-                          to={`/update-time-sheet/${item.id}`}
+                          to={`/update-trip/${item.id}`}
                           state={{ data: item }}
                           className="text-blue-500 text-lg mx-1"
                         >
@@ -237,6 +249,12 @@ const TimeSheetTable = ({
           rowData={filteredData}
         />
       </div>
+
+      <ImagePreviewModal
+        isOpen={imageModalOpen}
+        onClose={() => setImageModalOpen(false)}
+        image={receiptImage}
+      />
     </>
   );
 };

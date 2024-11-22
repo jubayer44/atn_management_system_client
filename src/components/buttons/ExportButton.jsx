@@ -2,12 +2,7 @@
 import { FiDownload } from "react-icons/fi";
 import * as XLSX from "xlsx";
 
-const ExportButton = ({
-  headerData,
-  data,
-  fileName = "roster.xlsx",
-  isLoggedIn,
-}) => {
+const ExportButton = ({ headerData, data, fileName = "time-sheet.xlsx" }) => {
   const handleExport = () => {
     if (!data || data.length === 0) {
       console.warn("No data provided for export.");
@@ -36,10 +31,8 @@ const ExportButton = ({
   return (
     <button
       onClick={handleExport}
-      disabled={!isLoggedIn}
-      className={`bg-primary text-white px-5 py-[6px] text-lg rounded-md mr-2 
-    ${isLoggedIn ? "hover:opacity-90" : "opacity-50 cursor-not-allowed"}`}
-      title={!isLoggedIn ? "Login to export roster" : "Export"}
+      className={`bg-primary text-white px-5 py-[6px] text-lg rounded-md mr-2 hover:opacity-90`}
+      title="Export"
     >
       <FiDownload />
     </button>

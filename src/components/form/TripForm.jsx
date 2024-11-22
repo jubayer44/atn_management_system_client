@@ -9,7 +9,8 @@ import {
   AiOutlineClockCircle,
   AiOutlineCloseCircle,
 } from "react-icons/ai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { parse } from "date-fns";
 
 const TripForm = ({
   register = null,
@@ -18,8 +19,22 @@ const TripForm = ({
   Controller,
   isLoading = false,
   setValue,
+  defaultData,
 }) => {
   const [imagePreview, setImagePreview] = useState(null);
+
+  const tripData = {
+    ...defaultData,
+    date:
+      defaultData?.date && parse(defaultData.date, "dd/MM/yyyy", new Date()),
+    tripStartTime:
+      defaultData?.tripStartTime &&
+      parse(defaultData?.tripStartTime, "hh:mm aa", new Date()),
+    tripEndTime:
+      defaultData?.tripEndTime &&
+      parse(defaultData?.tripEndTime, "hh:mm aa", new Date()),
+    tripReceipt: defaultData?.tripReceipt && defaultData?.tripReceipt,
+  };
 
   // Handle file change (image upload)
   const handleImageChange = (e) => {
@@ -41,6 +56,13 @@ const TripForm = ({
     // document.getElementById("imageUpload").value = "";
   };
 
+  useEffect(() => {
+    if (tripData?.tripReceipt) {
+      setImagePreview(tripData?.tripReceipt);
+      setValue("tripReceipt", tripData?.tripReceipt);
+    }
+  }, [tripData?.tripReceipt, setValue]);
+
   return (
     <div className="grid grid-cols-2 gap-4 mb-6">
       <div className="w-full col-span-2">
@@ -58,6 +80,7 @@ const TripForm = ({
             control={control}
             name="date"
             rules={{ required: "Date Begin is required" }}
+            defaultValue={tripData?.date}
             render={({ field }) => (
               <DatePicker
                 placeholderText="dd-mm-yyyy"
@@ -100,6 +123,7 @@ const TripForm = ({
             control={control}
             name="tripStartTime"
             rules={{ required: "Trip Start Time is required" }}
+            defaultValue={tripData?.tripStartTime}
             render={({ field }) => (
               <DatePicker
                 selected={field.value}
@@ -145,6 +169,7 @@ const TripForm = ({
             control={control}
             name="tripEndTime"
             rules={{ required: "Trip End Time is required" }}
+            defaultValue={tripData?.tripEndTime}
             render={({ field }) => (
               <DatePicker
                 selected={field.value}
@@ -182,25 +207,8 @@ const TripForm = ({
         </label>
 
         <div className="w-full relative mt-2">
-          <div className="flex items-center justify-center border-2 border-dashed border-gray-300 p-4 rounded-lg cursor-pointer hover:border-blue-500">
-            <input
-              type="file"
-              id="imageUpload"
-              accept="image/*"
-              {...register("imageUpload")}
-              onChange={handleImageChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-            <div className="flex flex-col items-center justify-center text-center">
-              <AiOutlineCamera className="text-gray-500 text-3xl mb-2" />
-              <span className="text-sm text-gray-500">
-                Click or Drag to Upload
-              </span>
-            </div>
-          </div>
-
           {/* Image Preview with Remove Option */}
-          {imagePreview && (
+          {imagePreview ? (
             <div className="mt-4 w-full flex justify-center relative">
               <img
                 src={imagePreview}
@@ -215,6 +223,23 @@ const TripForm = ({
               >
                 <AiOutlineCloseCircle className="text-xl" />
               </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center border-2 border-dashed border-gray-300 p-4 rounded-lg cursor-pointer hover:border-blue-500">
+              <input
+                type="file"
+                id="imageUpload"
+                accept="image/*"
+                {...register("imageUpload")}
+                onChange={handleImageChange}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+              <div className="flex flex-col items-center justify-center text-center">
+                <AiOutlineCamera className="text-gray-500 text-3xl mb-2" />
+                <span className="text-sm text-gray-500">
+                  Click or Drag to Upload
+                </span>
+              </div>
             </div>
           )}
 
@@ -234,6 +259,7 @@ const TripForm = ({
         <textarea
           cols={3}
           placeholder="Memo"
+          defaultValue={tripData?.memo}
           id="memo"
           name="memo"
           {...register("memo")}

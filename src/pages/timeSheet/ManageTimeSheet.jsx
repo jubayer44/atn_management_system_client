@@ -10,7 +10,7 @@ import { searchSuggestions } from "../../utils/searchSuggestions";
 import TimeSheetTable from "../../components/rosterTable/TimeSheetTable";
 import { Link } from "react-router-dom";
 
-const TimeSheet = () => {
+const ManageTimeSheet = () => {
   // window.scrollTo(0, 0);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState([1]);
@@ -108,7 +108,7 @@ const TimeSheet = () => {
       >
         <div>
           <h1 className="text-lg font-semibold text-tColor mb-2 text-center md:text-left">
-            My Time Sheet
+            Manage Time Sheet
           </h1>
 
           <div className="mb-4 bg-slate-100 shadow-lg p-2 md:p-6 rounded-lg">
@@ -248,4 +248,4 @@ const TimeSheet = () => {
   );
 };
 
-export default TimeSheet;
+export default ManageTimeSheet;

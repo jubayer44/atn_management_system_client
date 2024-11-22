@@ -3,9 +3,11 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import TripForm from "../../components/form/TripForm";
 import ErrorModal from "../../components/modal/ErrorModal";
+import { useLocation } from "react-router-dom";
 
-const AddNewTrip = () => {
+const UpdateTrip = () => {
   window.scrollTo(0, 0);
+  const defaultData = useLocation()?.state?.data;
 
   const [openErrorModal, setOpenErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -21,11 +23,6 @@ const AddNewTrip = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    // const date = new Date(
-    //   "Fri Nov 22 2024 19:10:00 GMT+0600 (Bangladesh Standard Time)"
-    // );
-    // const formattedDate = format(date, "dd/MM/yyyy");
-    // console.log(formattedDate);
     console.log(data);
   };
 
@@ -38,7 +35,7 @@ const AddNewTrip = () => {
       >
         <div className="w-full p-8 space-y-6 bg-gray-50 rounded-lg shadow-lg max-w-3xl">
           <h1 className="text-lg font-semibold text-tColor text-center mb-10">
-            Add New Trip
+            Update Trip
           </h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto">
@@ -48,6 +45,7 @@ const AddNewTrip = () => {
               control={control}
               Controller={Controller}
               setValue={setValue}
+              defaultData={defaultData}
             />
 
             <div className="flex justify-center w-full">
@@ -78,4 +76,4 @@ const AddNewTrip = () => {
   );
 };
 
-export default AddNewTrip;
+export default UpdateTrip;

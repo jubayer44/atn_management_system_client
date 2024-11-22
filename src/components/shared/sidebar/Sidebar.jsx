@@ -55,20 +55,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         } md:translate-x-0 transition-transform duration-200 ease-in-out z-40`}
       >
         <nav className="flex-1 p-4 space-y-2">
-          {/* <NavLink
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${navColor} ${
-                isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
-              }`
-            }
-          >
-            <FaHome />
-            <span>Home</span>
-          </NavLink> */}
           <NavLink
-            to="/time-sheet"
+            to="/"
             onClick={() => setIsOpen(false)}
             className={({ isActive }) =>
               `${navColor} ${
@@ -78,6 +66,30 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           >
             <FaList />
             <span>My Time Sheet</span>
+          </NavLink>
+          <NavLink
+            to="/manage-time-sheet"
+            onClick={() => setIsOpen(false)}
+            className={({ isActive }) =>
+              `${navColor} ${
+                isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
+              }`
+            }
+          >
+            <FaList />
+            <span>Manage Time Sheet</span>
+          </NavLink>
+          <NavLink
+            to="/manage-users"
+            onClick={() => setIsOpen(false)}
+            className={({ isActive }) =>
+              `${navColor} ${
+                isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
+              }`
+            }
+          >
+            <FaList />
+            <span>Manage Users</span>
           </NavLink>
 
           {user &&
