@@ -22,7 +22,7 @@ const ManageUsersTable = ({
 }) => {
   const userInfo = getUserInfo();
 
-  const isSuperAdmin = userInfo?.role === userRole.superAdmin;
+  const isSuperAdmin = userInfo?.role === userRole.admin;
   return (
     <table className="min-w-full">
       <thead className="whitespace-nowrap text-tColor">
@@ -36,7 +36,7 @@ const ManageUsersTable = ({
                   checked={
                     selectedUsers.size ===
                     userData?.data?.filter(
-                      (user) => user?.role?.toLowerCase() !== "super_admin"
+                      (user) => user?.role?.toLowerCase() !== userRole.admin
                     )?.length
                   }
                   className="hidden"
@@ -46,7 +46,7 @@ const ManageUsersTable = ({
                     className={`w-3 h-3 bg-blue-500 rounded-lg transform transition-transform duration-200 ease-in-out ${
                       selectedUsers.size ===
                       userData?.data?.filter(
-                        (user) => user?.role?.toLowerCase() !== "super_admin"
+                        (user) => user?.role?.toLowerCase() !== userRole.admin
                       )?.length
                         ? "scale-100"
                         : "scale-0"
@@ -74,11 +74,11 @@ const ManageUsersTable = ({
                     type="checkbox"
                     checked={
                       selectedUsers.has(user.id) &&
-                      user?.role?.toLowerCase() !== "super_admin"
+                      user?.role?.toLowerCase() !== userRole.admin
                     }
-                    disabled={user?.role?.toLowerCase() === "super_admin"}
+                    disabled={user?.role?.toLowerCase() === userRole.admin}
                     onChange={() => {
-                      if (user?.role.toLowerCase() !== "super_admin") {
+                      if (user?.role.toLowerCase() !== userRole.admin) {
                         handleSelectUser(user.id);
                       }
                     }}
@@ -86,7 +86,7 @@ const ManageUsersTable = ({
                   />
                   <span
                     className={`w-5 h-5 bg-gray-300 rounded-lg flex items-center justify-center transition-colors duration-200 ease-in-out ${
-                      user?.role?.toLowerCase() === "super_admin"
+                      user?.role?.toLowerCase() === userRole.admin
                         ? "cursor-not-allowed opacity-50"
                         : ""
                     }`}
@@ -94,7 +94,7 @@ const ManageUsersTable = ({
                     <span
                       className={`w-3 h-3 bg-blue-500 rounded-lg transform transition-transform duration-200 ease-in-out ${
                         selectedUsers.has(user.id) &&
-                        user?.role?.toLowerCase() !== "super_admin"
+                        user?.role?.toLowerCase() !== userRole.admin
                           ? "scale-100"
                           : "scale-0"
                       }`}
@@ -134,14 +134,14 @@ const ManageUsersTable = ({
                 <div className="relative flex justify-center items-center gap-2">
                   <button
                     className={`ml-2 ${
-                      user?.role?.toLowerCase() === "super_admin" ||
+                      user?.role?.toLowerCase() === userRole.admin ||
                       user?.id === userInfo?.id
                         ? "hidden"
                         : "block"
                     }`}
                     disabled={
                       isLoadingUpdate ||
-                      user?.role?.toLowerCase() === "super_admin"
+                      user?.role?.toLowerCase() === userRole.admin
                     }
                     title="Change Status"
                     onClick={() => toggleDialog(user.id)}
@@ -173,14 +173,15 @@ const ManageUsersTable = ({
             <td className="p-4">
               <button
                 className={`mr-3 ${
-                  user?.role?.toLowerCase() === "super_admin" ||
+                  user?.role?.toLowerCase() === userRole.admin ||
                   user?.id === userInfo?.id
                     ? "hidden"
                     : ""
                 }`}
                 title="Edit"
                 disabled={
-                  isLoadingUpdate || user?.role?.toLowerCase() === "super_admin"
+                  isLoadingUpdate ||
+                  user?.role?.toLowerCase() === userRole.admin
                 }
                 onClick={() => {
                   setUpdateModalOpen(true);
@@ -191,14 +192,15 @@ const ManageUsersTable = ({
               </button>
               <button
                 className={`${
-                  user?.role?.toLowerCase() === "super_admin" ||
+                  user?.role?.toLowerCase() === userRole.admin ||
                   user?.id === userInfo?.id
                     ? "hidden"
                     : ""
                 }`}
                 title="Delete"
                 disabled={
-                  isLoadingDelete || user?.role?.toLowerCase() === "super_admin"
+                  isLoadingDelete ||
+                  user?.role?.toLowerCase() === userRole.admin
                 }
                 onClick={() => {
                   setDeleteItem(user);

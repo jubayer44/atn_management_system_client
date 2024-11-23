@@ -13,8 +13,7 @@ const ExportButton = ({ headerData, data, fileName = "time-sheet.xlsx" }) => {
     const exportData = data.map((item) => {
       const filteredItem = {};
       headerData.forEach((header) => {
-        filteredItem[header.value === "weekend" ? "GB#" : header.value] =
-          item[header.value === "weekend" ? "weekendNo" : header.value];
+        filteredItem[header.label] = item[header.value];
       });
       return filteredItem;
     });

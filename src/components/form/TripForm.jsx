@@ -65,7 +65,30 @@ const TripForm = ({
 
   return (
     <div className="grid grid-cols-2 gap-4 mb-6">
-      <div className="w-full col-span-2">
+      <div className="col-span-1">
+        <label htmlFor="memo" className="block text-sm font-medium text-tColor">
+          Trip ID
+        </label>
+
+        <input
+          type="text"
+          placeholder="T0001"
+          defaultValue={tripData?.tripId}
+          id="tripId"
+          name="tripId"
+          {...register("tripId", {
+            required: "Trip ID is required",
+          })}
+          className={`w-full px-4 py-2 mt-2 text-tColor bg-white border text-sm border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none hover:border-blue-500 ${
+            errors.tripId ? "border-red-500" : ""
+          }`}
+        />
+        {errors.tripId && (
+          <span className="text-xs text-red-500">{errors.tripId.message}</span>
+        )}
+      </div>
+
+      <div className="w-full col-span-1">
         <label htmlFor="date" className="block text-sm font-medium text-tColor">
           Select Date <span className="text-red-500 text-base">*</span>
         </label>
@@ -79,7 +102,7 @@ const TripForm = ({
           <Controller
             control={control}
             name="date"
-            rules={{ required: "Date Begin is required" }}
+            rules={{ required: "Date is required" }}
             defaultValue={tripData?.date}
             render={({ field }) => (
               <DatePicker

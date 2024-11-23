@@ -7,7 +7,7 @@ import { testData } from "../../assets/fakeData";
 import FilterModal from "../../components/modal/FilterModal";
 import { useGetViewRosterQuery } from "../../redux/features/roster/rosterApi";
 import { searchSuggestions } from "../../utils/searchSuggestions";
-import TimeSheetTable from "../../components/rosterTable/TimeSheetTable";
+import TimeSheetTable from "../../components/timeSheetTable/TimeSheetTable";
 import { Link } from "react-router-dom";
 
 const TimeSheet = () => {

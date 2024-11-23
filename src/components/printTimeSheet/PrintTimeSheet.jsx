@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 
-const PrintRoster = ({ headerData, rowData }) => {
+const PrintTimeSheet = ({ headerData, rowData }) => {
   return (
     <div className="print-container w-full mx-auto mb-10">
       <h1 className="text-lg md:text-xl font-bold text-center mb-2 print-title">
@@ -21,7 +21,7 @@ const PrintRoster = ({ headerData, rowData }) => {
                     key={i}
                     className="py-2 border-r border-b border-gray-400 text-xs md:text-sm px-1 text-center text-nowrap"
                   >
-                    {item.label === "Weekend" ? "GB#" : item.label}
+                    {item.label}
                   </th>
                 ))}
               </tr>
@@ -34,10 +34,7 @@ const PrintRoster = ({ headerData, rowData }) => {
                   </td>
                   {Object.keys(item)?.map((key) => {
                     const exists = headerData?.some(
-                      (header) =>
-                        (header.value === "weekend"
-                          ? "weekendNo"
-                          : header.value) === key
+                      (header) => header.value === key
                     );
                     return (
                       key !== "id" &&
@@ -46,7 +43,17 @@ const PrintRoster = ({ headerData, rowData }) => {
                           key={key}
                           className="py-2 text-left border-gray-400 text-xs md:text-sm px-1 border-r text-nowrap"
                         >
-                          {item[key]}
+                          {key === "tripReceipt" && item[key] ? (
+                            <a
+                              target="_blank"
+                              href={item[key]}
+                              className="text-blue-500 px-2"
+                            >
+                              View Receipt
+                            </a>
+                          ) : (
+                            item[key]
+                          )}
                         </td>
                       )
                     );
@@ -61,4 +68,4 @@ const PrintRoster = ({ headerData, rowData }) => {
   );
 };
 
-export default PrintRoster;
+export default PrintTimeSheet;

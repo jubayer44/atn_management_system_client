@@ -10,7 +10,7 @@ import {
 import { ImCross } from "react-icons/im";
 import { Link, NavLink } from "react-router-dom";
 import useLogout from "../../../hooks/useLogout";
-import { getUserInfo } from "../../../services/authServices";
+// import { getUserInfo } from "../../../services/authServices";
 import { userRole } from "../../../utils/constant";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -23,7 +23,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     setIsOpen(!isOpen);
   };
 
-  const user = getUserInfo();
+  // const user = getUserInfo();
+  const user = {
+    role: "user",
+  };
 
   const navColor =
     "flex items-center p-2 space-x-2 rounded hover:text-primary font-[500] hover:bg-white hover:border-l-4 hover:border-primary text-sm";
@@ -55,74 +58,48 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         } md:translate-x-0 transition-transform duration-200 ease-in-out z-40`}
       >
         <nav className="flex-1 p-4 space-y-2">
-          <NavLink
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${navColor} ${
-                isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
-              }`
-            }
-          >
-            <FaList />
-            <span>My Time Sheet</span>
-          </NavLink>
-          <NavLink
-            to="/manage-time-sheet"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${navColor} ${
-                isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
-              }`
-            }
-          >
-            <FaList />
-            <span>Manage Time Sheet</span>
-          </NavLink>
-          <NavLink
-            to="/manage-users"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${navColor} ${
-                isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
-              }`
-            }
-          >
-            <FaList />
-            <span>Manage Users</span>
-          </NavLink>
-
-          {user &&
-            (user?.role === userRole.admin ||
-              user?.role === userRole.superAdmin) && (
-              <>
-                <NavLink
-                  to="/manage-roster"
-                  onClick={() => setIsOpen(false)}
-                  className={({ isActive }) =>
-                    `${navColor} ${
-                      isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
-                    }`
-                  }
-                >
-                  <FaCog />
-                  <span>Manage Time Sheet</span>
-                </NavLink>
-
-                <NavLink
-                  to="/manage-users"
-                  onClick={() => setIsOpen(false)}
-                  className={({ isActive }) =>
-                    `${navColor} ${
-                      isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
-                    }`
-                  }
-                >
-                  <FaUsers />
-                  <span>Manage Users</span>
-                </NavLink>
-              </>
-            )}
+          {user && user?.role === userRole.user && (
+            <NavLink
+              to="/"
+              onClick={() => setIsOpen(false)}
+              className={({ isActive }) =>
+                `${navColor} ${
+                  isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
+                }`
+              }
+            >
+              <FaList />
+              <span>My Time Sheet</span>
+            </NavLink>
+          )}
+          {user && user?.role === userRole.admin && (
+            <>
+              <NavLink
+                to="/"
+                onClick={() => setIsOpen(false)}
+                className={({ isActive }) =>
+                  `${navColor} ${
+                    isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
+                  }`
+                }
+              >
+                <FaCog />
+                <span>Manage Time Sheet</span>
+              </NavLink>
+              <NavLink
+                to="/manage-users"
+                onClick={() => setIsOpen(false)}
+                className={({ isActive }) =>
+                  `${navColor} ${
+                    isActive ? activeNavColor : "border-l-4 border-[#f9f3fd]"
+                  }`
+                }
+              >
+                <FaUsers />
+                <span>Manage Users</span>
+              </NavLink>
+            </>
+          )}
 
           <div className="absolute bottom-4 w-full left-0 px-4">
             {user?.email ? (

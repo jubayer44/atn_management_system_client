@@ -28,14 +28,6 @@ const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Session"],
     }),
-    deleteTables: builder.mutation({
-      query: (data) => ({
-        url: "/auth/super_admin/delete-tables",
-        method: "DELETE",
-        data,
-      }),
-      invalidatesTags: ["Weekend", "Roster", "Role", "Individual"],
-    }),
   }),
 });
 
@@ -43,5 +35,4 @@ export const {
   useChangePasswordMutation,
   useGetMySessionsQuery,
   useDeleteOtherSessionMutation,
-  useDeleteTablesMutation,
 } = authApi;

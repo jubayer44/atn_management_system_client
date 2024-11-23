@@ -15,6 +15,7 @@ import {
 } from "../../redux/features/user/userApi";
 import ManageUsersTable from "./ManageUsersTable";
 import MultipleDeleteConfirmModal from "../../components/modal/MultipleDeleteConfirmationModal";
+import { userRole } from "../../utils/constant";
 
 const ManageUsers = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -101,7 +102,7 @@ const ManageUsers = () => {
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       const allIds = userData?.data
-        ?.filter((user) => user.role.toLowerCase() !== "super_admin")
+        ?.filter((user) => user.role.toLowerCase() !== userRole.admin)
         .map((user) => user.id);
       setSelectedUsers(new Set(allIds));
     } else {

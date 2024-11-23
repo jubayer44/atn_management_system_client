@@ -7,7 +7,7 @@ import { testData } from "../../assets/fakeData";
 import FilterModal from "../../components/modal/FilterModal";
 import { useGetViewRosterQuery } from "../../redux/features/roster/rosterApi";
 import { searchSuggestions } from "../../utils/searchSuggestions";
-import TimeSheetTable from "../../components/rosterTable/TimeSheetTable";
+import TimeSheetTable from "../../components/timeSheetTable/TimeSheetTable";
 import { Link } from "react-router-dom";
 
 const ManageTimeSheet = () => {
@@ -39,12 +39,12 @@ const ManageTimeSheet = () => {
   // const filteredData = rosterData?.data || [];
   const filteredData = testData || [];
 
-  const handleClearFilters = () => {
-    setSearchTerm("");
-    setCurrentPage(1);
-    setSelectedDate("");
-    setSortOrder("asc");
-  };
+  // const handleClearFilters = () => {
+  //   setSearchTerm("");
+  //   setCurrentPage(1);
+  //   setSelectedDate("");
+  //   setSortOrder("asc");
+  // };
 
   const handleFilterClick = () => {
     setIsModalOpen(true);

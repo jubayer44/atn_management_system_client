@@ -15,15 +15,30 @@ import TimeSheet from "../pages/timeSheet/TimeSheet";
 import AddNewTrip from "../pages/trip/AddNewTrip";
 import UpdateTrip from "../pages/trip/UpdateTrip";
 
+// const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
+const user = "user";
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
-      {
+      user === "admin" && {
         path: "/",
-        element: <TimeSheet />,
+        element: (
+          <AdminProtectedRoute>
+            <ManageTimeSheet />
+          </AdminProtectedRoute>
+        ),
+      },
+      user === "user" && {
+        path: "/",
+        element: (
+          // <AdminProtectedRoute>
+          <TimeSheet />
+          // </AdminProtectedRoute>
+        ),
       },
       {
         path: "/new-trip",

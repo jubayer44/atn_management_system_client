@@ -10,8 +10,8 @@ import ExportButton from "../buttons/ExportButton";
 import LoadingTableSkeleton from "../loading/LoadingTableSkeleton";
 import DeleteConfirmModal from "../modal/DeleteConfirmationModal";
 import TablePagination from "../pagination/TablePagination";
-import PrintRoster from "../printRoster/PrintRoster";
 import ImagePreviewModal from "../modal/ImagePreviewModal";
+import PrintTimeSheet from "../printTimeSheet/PrintTimeSheet";
 
 const TimeSheetTable = ({
   filteredData,
@@ -244,7 +244,7 @@ const TimeSheetTable = ({
       ) : null}
 
       <div className="-mt-[200px]">
-        <PrintRoster
+        <PrintTimeSheet
           headerData={customizeHeaderOptions}
           rowData={filteredData}
         />
