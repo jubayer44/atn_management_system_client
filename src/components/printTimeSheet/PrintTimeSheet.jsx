@@ -41,7 +41,11 @@ const PrintTimeSheet = ({ headerData, rowData }) => {
                       exists && (
                         <td
                           key={key}
-                          className="py-2 text-left border-gray-400 text-xs md:text-sm px-1 border-r text-nowrap"
+                          className={`py-2 text-left border-gray-400 text-xs md:text-sm px-1 border-r ${
+                            key === "memo"
+                              ? "text-wrap min-w-[150px]"
+                              : "text-nowrap"
+                          }`}
                         >
                           {key === "tripReceipt" && item[key] ? (
                             <a

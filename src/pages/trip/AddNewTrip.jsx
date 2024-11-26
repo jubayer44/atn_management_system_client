@@ -1,32 +1,56 @@
 import { useState } from "react";
 
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import TripForm from "../../components/form/TripForm";
 import ErrorModal from "../../components/modal/ErrorModal";
+import { useAddNewTimeSheetMutation } from "../../redux/features/timeSheet/timeSheetApi";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const AddNewTrip = () => {
-  window.scrollTo(0, 0);
-
   const [openErrorModal, setOpenErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [addNewTimeSheet, { isLoading }] = useAddNewTimeSheetMutation();
 
-  const disabledState = false;
+  const navigate = useNavigate();
+
+  const formData = new FormData();
+
+  const disabledState = isLoading;
 
   const {
     register,
     handleSubmit,
     control,
     setValue,
+    reset,
     formState: { errors },
   } = useForm();
 
   const onSubmit = async (data) => {
-    // const date = new Date(
-    //   "Fri Nov 22 2024 19:10:00 GMT+0600 (Bangladesh Standard Time)"
-    // );
-    // const formattedDate = format(date, "dd/MM/yyyy");
-    // console.log(formattedDate);
-    console.log(data);
+    const payload = {
+      date: data.date,
+      tripId: data.tripId,
+      tripStartTime: data.tripStartTime,
+      tripEndTime: data.tripEndTime,
+      hourlyRate: Number(data.hourlyRate),
+      memo: data.memo,
+    };
+    formData.append("file", data.tripReceipt);
+    formData.append("data", JSON.stringify(payload));
+    const result = await addNewTimeSheet(formData);
+
+    if (result?.data?.success) {
+      toast.success("Trip added successfully");
+      reset();
+      setOpenErrorModal(false);
+      setErrorMessage("");
+      navigate("/my-time-sheet");
+    }
+    if (result?.error) {
+      setOpenErrorModal(true);
+      setErrorMessage(result?.error?.data?.message || "Something went wrong");
+    }
   };
 
   return (
@@ -47,6 +71,7 @@ const AddNewTrip = () => {
               errors={errors}
               control={control}
               Controller={Controller}
+              useWatch={useWatch}
               setValue={setValue}
             />
 

@@ -3,12 +3,11 @@ import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { FaPlus, FaRegCalendarAlt, FaSearch } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-import { testData } from "../../assets/fakeData";
-import FilterModal from "../../components/modal/FilterModal";
-import { useGetViewRosterQuery } from "../../redux/features/roster/rosterApi";
-import { searchSuggestions } from "../../utils/searchSuggestions";
-import TimeSheetTable from "../../components/timeSheetTable/TimeSheetTable";
 import { Link } from "react-router-dom";
+import FilterModal from "../../components/modal/FilterModal";
+import TimeSheetTable from "../../components/timeSheetTable/TimeSheetTable";
+import { useGetTimeSheetsQuery } from "../../redux/features/timeSheet/timeSheetApi";
+import { searchSuggestions } from "../../utils/searchSuggestions";
 
 const TimeSheet = () => {
   // window.scrollTo(0, 0);
@@ -21,30 +20,26 @@ const TimeSheet = () => {
   const inputRef = useRef(null);
   const suggestionRef = useRef(null);
   const [suggestions, setSuggestions] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [deleteItem, setDeleteItem] = useState({});
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const searchParams = {
     ...(searchTerm ? { searchTerm } : {}),
+    ...(startDate ? { startDate } : {}),
+    ...(endDate ? { endDate } : {}),
     sortOrder,
     page: currentPage,
     limit: itemsPerPage,
   };
+
   const {
-    data: rosterData,
+    data: timeSheetData,
     isLoading,
     isFetching,
-  } = useGetViewRosterQuery(searchParams);
+  } = useGetTimeSheetsQuery(searchParams);
 
-  // const filteredData = rosterData?.data || [];
-  const filteredData = testData || [];
-
-  const handleClearFilters = () => {
-    setSearchTerm("");
-    setCurrentPage(1);
-    setSelectedDate("");
-    setSortOrder("asc");
-  };
+  const filteredData = timeSheetData?.data || [];
 
   const handleFilterClick = () => {
     setIsModalOpen(true);
@@ -96,8 +91,8 @@ const TimeSheet = () => {
     setCurrentPage(1);
   }, [itemsPerPage]);
 
-  const showDate = selectedDate && format(selectedDate, "dd/MM/yyyy");
-  // const showDate = "12/10/2024";
+  const showDate = startDate && format(startDate, "dd/MM/yyyy");
+  const showDate2 = endDate && format(endDate, "dd/MM/yyyy");
 
   return (
     <>
@@ -119,7 +114,10 @@ const TimeSheet = () => {
                     What are you looking for?
                   </p>
                   <div
-                    onFocus={() => setOpenSuggestion(true)}
+                    onFocus={() => {
+                      setOpenSuggestion(true);
+                      setCurrentPage(1);
+                    }}
                     ref={inputRef}
                     className="flex justify-between w-full"
                   >
@@ -192,16 +190,25 @@ const TimeSheet = () => {
               <div className="flex gap-2 flex-wrap items-center mt-4 text-tColor">
                 <p
                   className={`text-xs font-semibold ${
-                    !selectedDate ? "hidden" : "block"
+                    !startDate || !endDate ? "hidden" : "block"
                   }`}
                 >
                   Filtered By:
                 </p>
-                {selectedDate && (
+                {startDate && (
                   <p className="text-xs px-2 py-1 bg-blue-100 rounded-md flex items-center gap-1 break-all">
-                    {showDate}
+                    {`Start: ${showDate}`}
                     <MdCancel
-                      onClick={() => setSelectedDate("")}
+                      onClick={() => setStartDate("")}
+                      className="text-sm cursor-pointer"
+                    />
+                  </p>
+                )}
+                {endDate && (
+                  <p className="text-xs px-2 py-1 bg-blue-100 rounded-md flex items-center gap-1 break-all">
+                    {`End: ${showDate2}`}
+                    <MdCancel
+                      onClick={() => setEndDate("")}
                       className="text-sm cursor-pointer"
                     />
                   </p>
@@ -226,8 +233,7 @@ const TimeSheet = () => {
             itemsPerPage={itemsPerPage}
             setItemsPerPage={setItemsPerPage}
             isLoading={isLoading}
-            // totalData={rosterData?.meta?.total}
-            totalData={testData.length}
+            totalData={timeSheetData?.meta?.total}
             isFetching={isFetching}
             deleteItem={deleteItem}
             setDeleteItem={setDeleteItem}
@@ -240,8 +246,10 @@ const TimeSheet = () => {
           handleApplyFilter={handleApplyFilter}
           sortOrder={sortOrder}
           setSortOrder={setSortOrder}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
         />
       )}
     </>

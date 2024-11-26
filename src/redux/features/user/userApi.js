@@ -19,6 +19,14 @@ const userApi = baseApi.injectEndpoints({
       }),
       providesTags: ["User"],
     }),
+    getAllEmployees: builder.query({
+      query: (args) => ({
+        url: "/user/all-employee",
+        method: "GET",
+        params: new URLSearchParams(args),
+      }),
+      providesTags: ["User"],
+    }),
     getSingleUser: builder.query({
       query: (id) => ({
         url: `/user/single-user/${id}`,
@@ -75,6 +83,7 @@ export const {
   useGetAllUsersQuery,
   useGetSingleUserQuery,
   useGetMyProfileQuery,
+  useGetAllEmployeesQuery,
   useUpdateUserMutation,
   useUpdateUserNameMutation,
   useDeleteUserMutation,

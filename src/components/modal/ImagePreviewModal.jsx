@@ -42,7 +42,7 @@ const ImagePreviewModal = ({ isOpen, onClose, image }) => {
       }`}
     >
       <div className="absolute inset-0 bg-gray-600 opacity-50 blur-sm"></div>
-      <div className="relative bg-white p-2 lg:p-6 rounded-lg shadow-sm z-10 mx-5 md:min-w-96 w-full max-w-7xl">
+      <div className="relative bg-white p-2 lg:p-6 rounded-lg shadow-sm z-10 mx-5 md:min-w-96 md:max-w-[80%] max-h-[90vh]">
         <p className="absolute top-2 right-2 z-10">
           <GiCancel
             className="text-red-500 text-2xl font-bold cursor-pointer"
@@ -50,7 +50,7 @@ const ImagePreviewModal = ({ isOpen, onClose, image }) => {
           />
         </p>
         <div className="flex justify-center items-center">
-          <img className="rounded-lg" src={image} alt="" />
+          <img className="rounded-lg w-full max-h-[60vh]" src={image} alt="" />
         </div>
         <div className="flex justify-end mt-2">
           <button

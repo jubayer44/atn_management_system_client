@@ -1,21 +1,17 @@
 import { useState } from "react";
 
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { useLocation, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import TripForm from "../../components/form/TripForm";
 import ErrorModal from "../../components/modal/ErrorModal";
-import { useUpdateTimeSheetMutation } from "../../redux/features/timeSheet/timeSheetApi";
-import { getUserInfo } from "../../services/authServices";
-import { parse } from "date-fns";
+import { useAddNewTimeSheetMutation } from "../../redux/features/timeSheet/timeSheetApi";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
-const UpdateTrip = () => {
+const AddNewTripAdmin = () => {
   const [openErrorModal, setOpenErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const defaultData = useLocation()?.state?.data;
-  const [updateTimeSheet, { isLoading }] = useUpdateTimeSheetMutation();
-
-  const role = getUserInfo()?.role;
+  const [selectedUser, setSelectedUser] = useState({});
+  const [addNewTimeSheet, { isLoading }] = useAddNewTimeSheetMutation();
 
   const navigate = useNavigate();
 
@@ -28,40 +24,30 @@ const UpdateTrip = () => {
     handleSubmit,
     control,
     setValue,
+    reset,
     formState: { errors },
-  } = useForm({
-    defaultValues: {
-      tripStartTime:
-        defaultData?.tripStartTime &&
-        parse(defaultData?.tripStartTime, "hh:mm aa", new Date()),
-    },
-  });
+  } = useForm();
 
   const onSubmit = async (data) => {
-    const updatePayload = {
-      date: data.date || defaultData?.date,
-      tripId: data.tripId || defaultData?.tripId,
-      tripStartTime: data.tripStartTime || defaultData?.tripStartTime,
-      tripEndTime: data.tripEndTime || defaultData?.tripEndTime,
-      hourlyRate: Number(data.hourlyRate) || Number(defaultData?.hourlyRate),
-      memo: data.memo || defaultData?.memo,
+    const payload = {
+      date: data.date,
+      tripId: data.tripId,
+      tripStartTime: data.tripStartTime,
+      tripEndTime: data.tripEndTime,
+      hourlyRate: Number(data.hourlyRate),
+      memo: data.memo,
+      userId: selectedUser?.value,
     };
+    formData.append("file", data.tripReceipt);
+    formData.append("data", JSON.stringify(payload));
 
-    if (data?.tripReceipt?.name) {
-      formData.append("file", data.tripReceipt);
-    }
-    formData.append("data", JSON.stringify(updatePayload));
-
-    const result = await updateTimeSheet({
-      id: defaultData?.id,
-      data: formData,
-    });
-
+    const result = await addNewTimeSheet(formData);
     if (result?.data?.success) {
-      toast.success("Trip updated successfully");
+      toast.success("Trip added successfully");
+      reset();
       setOpenErrorModal(false);
       setErrorMessage("");
-      navigate(role === "admin" ? "/manage-time-sheet" : "/my-time-sheet");
+      navigate("/manage-time-sheet");
     }
     if (result?.error) {
       setOpenErrorModal(true);
@@ -78,7 +64,7 @@ const UpdateTrip = () => {
       >
         <div className="w-full p-8 space-y-6 bg-gray-50 rounded-lg shadow-lg max-w-3xl">
           <h1 className="text-lg font-semibold text-tColor text-center mb-10">
-            Update Trip
+            Add New Trip (Admin)
           </h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto">
@@ -89,7 +75,8 @@ const UpdateTrip = () => {
               Controller={Controller}
               useWatch={useWatch}
               setValue={setValue}
-              defaultData={defaultData}
+              selectedUser={selectedUser}
+              setSelectedUser={setSelectedUser}
             />
 
             <div className="flex justify-center w-full">
@@ -102,7 +89,7 @@ const UpdateTrip = () => {
                     : "hover:opacity-90"
                 }`}
               >
-                {disabledState ? "Updating..." : "Update"}
+                {disabledState ? "Submitting" : "Submit"}
               </button>
             </div>
           </form>
@@ -120,4 +107,4 @@ const UpdateTrip = () => {
   );
 };
 
-export default UpdateTrip;
+export default AddNewTripAdmin;

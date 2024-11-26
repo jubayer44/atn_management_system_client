@@ -14,9 +14,9 @@ import ManageTimeSheet from "../pages/timeSheet/ManageTimeSheet";
 import TimeSheet from "../pages/timeSheet/TimeSheet";
 import AddNewTrip from "../pages/trip/AddNewTrip";
 import UpdateTrip from "../pages/trip/UpdateTrip";
-
-// const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
-const user = "user";
+import Home from "../pages/home/Home";
+import UserProtectedRoute from "./../components/layouts/UserProtectedRoute";
+import AddNewTripAdmin from "../pages/trip/AddNewTripAdmin";
 
 const router = createBrowserRouter([
   {
@@ -24,38 +24,55 @@ const router = createBrowserRouter([
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
-      user === "admin" && {
+      {
         path: "/",
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/my-time-sheet",
+        element: (
+          <UserProtectedRoute>
+            <TimeSheet />
+          </UserProtectedRoute>
+        ),
+      },
+      {
+        path: "/new-trip",
+        element: (
+          <UserProtectedRoute>
+            <AddNewTrip />
+          </UserProtectedRoute>
+        ),
+      },
+      {
+        path: "/new-trip-admin",
+        element: (
+          <AdminProtectedRoute>
+            <AddNewTripAdmin />
+          </AdminProtectedRoute>
+        ),
+      },
+      {
+        path: "/update-trip/:id",
+        element: (
+          <ProtectedRoute>
+            <UpdateTrip />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/manage-time-sheet",
         element: (
           <AdminProtectedRoute>
             <ManageTimeSheet />
           </AdminProtectedRoute>
         ),
       },
-      user === "user" && {
-        path: "/",
-        element: (
-          // <AdminProtectedRoute>
-          <TimeSheet />
-          // </AdminProtectedRoute>
-        ),
-      },
-      {
-        path: "/new-trip",
-        element: <AddNewTrip />,
-      },
-      {
-        path: "/update-trip/:id",
-        element: <UpdateTrip />,
-      },
-      {
-        path: "/manage-time-sheet",
-        element: <ManageTimeSheet />,
-      },
-      {
-        path: "/manage-users",
-        element: <ManageUsers />,
-      },
+
       {
         path: "/manage-users",
         element: (
@@ -64,6 +81,7 @@ const router = createBrowserRouter([
           </AdminProtectedRoute>
         ),
       },
+
       {
         path: "/profile",
         element: (

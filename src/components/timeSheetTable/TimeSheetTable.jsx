@@ -9,9 +9,12 @@ import { columnOptions } from "../../utils/utils";
 import ExportButton from "../buttons/ExportButton";
 import LoadingTableSkeleton from "../loading/LoadingTableSkeleton";
 import DeleteConfirmModal from "../modal/DeleteConfirmationModal";
-import TablePagination from "../pagination/TablePagination";
 import ImagePreviewModal from "../modal/ImagePreviewModal";
+import TablePagination from "../pagination/TablePagination";
 import PrintTimeSheet from "../printTimeSheet/PrintTimeSheet";
+import { useDeleteTimeSheetMutation } from "../../redux/features/timeSheet/timeSheetApi";
+import { toast } from "sonner";
+import ErrorModal from "../modal/ErrorModal";
 
 const TimeSheetTable = ({
   filteredData,
@@ -24,11 +27,38 @@ const TimeSheetTable = ({
   isFetching,
   deleteItem,
   setDeleteItem,
+  totalPayment,
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [receiptImage, setReceiptImage] = useState("");
+  const [customValue, setCustomValue] = useState("");
+  const [isCustomSelected, setIsCustomSelected] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [openErrorModal, setOpenErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [deleteTimeSheet, { isLoading: isLoadingDelete }] =
+    useDeleteTimeSheetMutation();
+
+  const handleCustomValueChange = (e) => {
+    const value = e.target.value;
+    if (value === "" || value >= 1) {
+      setCustomValue(value);
+      setItemsPerPage(value === "" ? 10 : Number(value));
+    }
+  };
+
+  const handleDropdownChange = (e) => {
+    const value = e.target.value;
+    if (value === "custom") {
+      setIsCustomSelected(true); // Show input when 'Custom' is selected
+      setCustomValue(""); // Clear custom value when selecting 'Custom'
+    } else {
+      setItemsPerPage(Number(value));
+      setIsCustomSelected(false); // Hide input when selecting predefined option
+    }
+  };
 
   // Filter the header options to show only selected columns
   const customizeHeaderOptions = columnOptions;
@@ -47,9 +77,27 @@ const TimeSheetTable = ({
   const adjustedStartIndex = startIndex > totalData ? totalData : startIndex;
 
   useEffect(() => {
+    const deleteData = async () => {
+      const res = await deleteTimeSheet(deleteItem.id);
+      if (res?.data?.success) {
+        toast.success("Trip deleted successfully");
+        setIsDelete(false);
+        setDeleteItem({});
+        setIsDeleteModalOpen(false);
+      }
+      if (res?.error) {
+        toast.error(res?.error?.data?.message || "Something went wrong");
+        setIsDelete(false);
+        setDeleteItem({});
+        setOpenErrorModal(true);
+        setErrorMessage(res?.error?.data?.message || "Something went wrong");
+      }
+    };
+
     if (deleteItem && isDelete) {
-      console.log(deleteItem, isDelete);
+      deleteData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDelete, deleteItem]);
 
   if (isLoading) {
@@ -84,23 +132,33 @@ const TimeSheetTable = ({
                 <div className="flex items-center gap-1 border rounded-md px-2 py-[2px] bg-gray-200">
                   <p className="text-xs font-[500]">Show Row</p>
                   <select
-                    value={itemsPerPage}
-                    onChange={(e) => setItemsPerPage(e.target.value)}
-                    className=" p-[2px] text-xs focus:outline-none border rounded-md border-blue-300 bg-slate-50"
+                    value={isCustomSelected ? "custom" : itemsPerPage}
+                    onChange={handleDropdownChange}
+                    className="p-[2px] text-xs focus:outline-none border rounded-md border-blue-300 bg-slate-50"
                   >
                     {[10, 25, 50, 100, 250, 500, 1000]?.map((item, i) => (
                       <option key={i} value={item}>
                         {item}
                       </option>
                     ))}
+                    <option value="custom">Custom</option>
                   </select>
+                  {/* Custom Input Field */}
+                  {isCustomSelected && (
+                    <input
+                      type="number"
+                      value={customValue}
+                      onChange={handleCustomValueChange}
+                      placeholder="Enter custom value"
+                      min="1"
+                      className="p-[2px] text-xs focus:outline-none border rounded-md border-blue-300 bg-slate-50 w-[60px]"
+                    />
+                  )}
                 </div>
               </div>
+
               <div>
-                <ExportButton
-                  headerData={customizeHeaderOptions}
-                  data={filteredData}
-                />
+                <ExportButton data={filteredData} totalPayment={totalPayment} />
                 <button
                   onClick={() => handlePrint()}
                   title={"Print"}
@@ -115,13 +173,13 @@ const TimeSheetTable = ({
               <table className="min-w-full bg-white text-tColor">
                 <thead className="bg-primary text-gray-200">
                   <tr>
-                    <th className="py-2 border-r border-b border-gray-400 text-xs md:text-sm px-1 last:border-r-0">
+                    <th className="p-2 border-r border-b border-gray-400 text-xs md:text-sm last:border-r-0">
                       No
                     </th>
                     {customizeHeaderOptions?.map((item, i) => (
                       <th
                         key={i}
-                        className="py-2 border-r border-b border-gray-400 text-xs md:text-sm px-1 last:border-r-0 text-nowrap"
+                        className="p-2 border-r border-b border-gray-400 text-xs md:text-sm last:border-r-0 text-nowrap"
                       >
                         {item.label}
                       </th>
@@ -132,84 +190,101 @@ const TimeSheetTable = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData?.map((item, i) => (
-                    <tr
-                      key={i}
-                      className={`border-gray-400 hover:bg-gray-200 ${
-                        i % 2 === 0 ? "bg-gray-100" : ""
-                      } ${
-                        i === filteredData.length - 1
-                          ? "border-b-0"
-                          : "border-b"
-                      }`}
-                    >
-                      {/* Display the index */}
-                      <td className="py-2 text-center border-gray-400 text-xs md:text-sm px-1 border-r last:border-r-0">
-                        {i + 1 + (currentPage - 1) * itemsPerPage}
-                      </td>
+                  {filteredData?.map((item, i) => {
+                    return (
+                      <tr
+                        key={i}
+                        className={`border-gray-400 hover:bg-gray-200 ${
+                          i % 2 === 0 ? "bg-gray-100" : ""
+                        } ${
+                          i === filteredData.length - 1
+                            ? "border-b-0"
+                            : "border-b"
+                        }`}
+                      >
+                        {/* Display the index */}
+                        <td className="py-2 text-center border-gray-400 text-xs md:text-sm px-1 border-r last:border-r-0">
+                          {i + 1 + (currentPage - 1) * itemsPerPage}
+                        </td>
 
-                      {/* Dynamically render object properties */}
-                      {Object.keys(item)?.map((key) => {
-                        const exists = customizeHeaderOptions.some(
-                          (header) => header.value === key
-                        );
+                        {/* Dynamically render object properties */}
+                        {Object.keys(item)?.map((key) => {
+                          const exists = customizeHeaderOptions.some(
+                            (header) => header.value === key
+                          );
 
-                        return (
-                          key !== "id" &&
-                          exists && (
-                            <td
-                              key={key}
-                              onClick={() => {
-                                if (key !== "tripReceipt") {
-                                  return;
+                          return (
+                            key !== "id" &&
+                            exists && (
+                              <td
+                                key={key}
+                                onClick={() => {
+                                  if (key !== "tripReceipt") {
+                                    return;
+                                  }
+                                  if (item[key]) {
+                                    setImageModalOpen(true);
+                                    setReceiptImage(item[key]);
+                                  }
+                                }}
+                                // i want to use 2 condition in the class like key === tripReceipt && item[key] ? "cursor-pointer" : ""
+                                className={`p-2 border-gray-400 text-xs md:text-sm border-r last:border-r-0 ${
+                                  key === "tripReceipt" && item[key]
+                                    ? "cursor-pointer"
+                                    : ""
+                                } ${
+                                  key === "memo" ? "text-wrap" : "text-nowrap"
+                                }`}
+                                style={
+                                  key === "memo"
+                                    ? {
+                                        maxWidth: "250px",
+                                        overflowX: "auto",
+                                        whiteSpace: "nowrap", // Prevent text from wrapping
+                                      }
+                                    : {}
                                 }
-                                if (item[key]) {
-                                  setImageModalOpen(true);
-                                  setReceiptImage(item[key]);
-                                }
-                              }}
-                              // i want to use 2 condition in the class like key === tripReceipt && item[key] ? "cursor-pointer" : ""
-                              className={`py-2 text-left border-gray-400 text-xs md:text-sm px-1 border-r text-nowrap last:border-r-0 ${
-                                key === "tripReceipt" && item[key]
-                                  ? "cursor-pointer"
-                                  : ""
-                              }`}
-                            >
-                              {key === "tripReceipt" && item[key] ? (
-                                <p className="text-blue-500 px-2">
-                                  View Receipt
-                                </p>
-                              ) : (
-                                item[key]
-                              )}
-                            </td>
-                          )
-                        );
-                      })}
-                      <td className="flex justify-evenly items-center py-2 text-left border-gray-400 text-xs md:text-sm px-1 border-r last:border-r-0">
-                        <Link
-                          to={`/update-trip/${item.id}`}
-                          state={{ data: item }}
-                          className="text-blue-500 text-lg mx-1"
-                        >
-                          <HiPencilAlt />
-                        </Link>
-                        <button
-                          // disabled={disabledState}
-                          onClick={() => {
-                            setDeleteItem({
-                              id: item.id,
-                              ...(item?.name ? { name: item?.name } : {}),
-                            });
-                            setIsModalOpen(true);
-                          }}
-                          className="text-red-500 text-lg mx-1"
-                        >
-                          <MdDelete />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                              >
+                                {key === "tripReceipt" && item[key] ? (
+                                  <p className="text-blue-500 px-2">
+                                    View Receipt
+                                  </p>
+                                ) : key === "payment" ? (
+                                  `$${item[key]}`
+                                ) : (
+                                  item[key]
+                                )}
+                              </td>
+                            )
+                          );
+                        })}
+                        <td className="flex justify-evenly items-center py-2 text-left border-gray-400 text-xs md:text-sm px-1 border-r last:border-r-0">
+                          <Link
+                            to={`/update-trip/${item.id}`}
+                            state={{ data: item }}
+                            className={`text-blue-500 text-lg mx-1 ${
+                              isLoadingDelete && "pointer-events-none"
+                            }`}
+                          >
+                            <HiPencilAlt />
+                          </Link>
+                          <button
+                            disabled={isLoadingDelete}
+                            onClick={() => {
+                              setDeleteItem({
+                                id: item.id,
+                                ...(item?.tripId ? { name: item?.tripId } : {}),
+                              });
+                              setIsDeleteModalOpen(true);
+                            }}
+                            className="text-red-500 text-lg mx-1"
+                          >
+                            <MdDelete />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -230,10 +305,11 @@ const TimeSheetTable = ({
               )}
             </div>
             <DeleteConfirmModal
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
+              isOpen={isDeleteModalOpen}
+              onClose={() => setIsDeleteModalOpen(false)}
               itemName={deleteItem?.name}
               setIsDelete={setIsDelete}
+              disabledState={isLoadingDelete}
             />
           </div>
         </div>
@@ -254,6 +330,11 @@ const TimeSheetTable = ({
         isOpen={imageModalOpen}
         onClose={() => setImageModalOpen(false)}
         image={receiptImage}
+      />
+      <ErrorModal
+        isOpen={openErrorModal}
+        onClose={() => setOpenErrorModal(false)}
+        message={errorMessage}
       />
     </>
   );

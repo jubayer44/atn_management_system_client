@@ -3,11 +3,10 @@ import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { FaPlus, FaRegCalendarAlt, FaSearch } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-import { testData } from "../../assets/fakeData";
 import FilterModal from "../../components/modal/FilterModal";
-import { useGetViewRosterQuery } from "../../redux/features/roster/rosterApi";
-import { searchSuggestions } from "../../utils/searchSuggestions";
 import TimeSheetTable from "../../components/timeSheetTable/TimeSheetTable";
+import { useGetTimeSheetsQuery } from "../../redux/features/timeSheet/timeSheetApi";
+import { searchSuggestions } from "../../utils/searchSuggestions";
 import { Link } from "react-router-dom";
 
 const ManageTimeSheet = () => {
@@ -21,30 +20,26 @@ const ManageTimeSheet = () => {
   const inputRef = useRef(null);
   const suggestionRef = useRef(null);
   const [suggestions, setSuggestions] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [deleteItem, setDeleteItem] = useState({});
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const searchParams = {
     ...(searchTerm ? { searchTerm } : {}),
+    ...(startDate ? { startDate } : {}),
+    ...(endDate ? { endDate } : {}),
     sortOrder,
     page: currentPage,
     limit: itemsPerPage,
   };
+
   const {
-    data: rosterData,
+    data: timeSheetData,
     isLoading,
     isFetching,
-  } = useGetViewRosterQuery(searchParams);
+  } = useGetTimeSheetsQuery(searchParams);
 
-  // const filteredData = rosterData?.data || [];
-  const filteredData = testData || [];
-
-  // const handleClearFilters = () => {
-  //   setSearchTerm("");
-  //   setCurrentPage(1);
-  //   setSelectedDate("");
-  //   setSortOrder("asc");
-  // };
+  const filteredData = timeSheetData?.data || [];
 
   const handleFilterClick = () => {
     setIsModalOpen(true);
@@ -96,8 +91,8 @@ const ManageTimeSheet = () => {
     setCurrentPage(1);
   }, [itemsPerPage]);
 
-  const showDate = selectedDate && format(selectedDate, "dd/MM/yyyy");
-  // const showDate = "12/10/2024";
+  const showDate = startDate && format(startDate, "dd/MM/yyyy");
+  const showDate2 = endDate && format(endDate, "dd/MM/yyyy");
 
   return (
     <>
@@ -172,13 +167,13 @@ const ManageTimeSheet = () => {
                     </form>
                     <div>
                       <Link
-                        to="/new-trip"
+                        to="/new-trip-admin"
                         className="bg-primary text-gray-100 text-sm font-semibold px-4 py-[5px] rounded-md hover:opacity-90 text-nowrap hidden md:flex items-center justify-center"
                       >
                         <FaPlus className="mr-1" /> New Trip
                       </Link>
                       <Link
-                        to="/new-trip"
+                        to="/new-trip-admin"
                         className="bg-primary text-gray-100 text-sm font-semibold px-4 py-[5px] rounded-md hover:opacity-90 text-nowrap md:hidden flex items-center justify-center"
                       >
                         <FaPlus className="mr-1" /> Trip
@@ -192,16 +187,25 @@ const ManageTimeSheet = () => {
               <div className="flex gap-2 flex-wrap items-center mt-4 text-tColor">
                 <p
                   className={`text-xs font-semibold ${
-                    !selectedDate ? "hidden" : "block"
+                    !startDate || !showDate ? "hidden" : "block"
                   }`}
                 >
                   Filtered By:
                 </p>
-                {selectedDate && (
+                {startDate && (
                   <p className="text-xs px-2 py-1 bg-blue-100 rounded-md flex items-center gap-1 break-all">
                     {showDate}
                     <MdCancel
-                      onClick={() => setSelectedDate("")}
+                      onClick={() => setStartDate("")}
+                      className="text-sm cursor-pointer"
+                    />
+                  </p>
+                )}
+                {endDate && (
+                  <p className="text-xs px-2 py-1 bg-blue-100 rounded-md flex items-center gap-1 break-all">
+                    {showDate2}
+                    <MdCancel
+                      onClick={() => setEndDate("")}
                       className="text-sm cursor-pointer"
                     />
                   </p>
@@ -226,8 +230,8 @@ const ManageTimeSheet = () => {
             itemsPerPage={itemsPerPage}
             setItemsPerPage={setItemsPerPage}
             isLoading={isLoading}
-            // totalData={rosterData?.meta?.total}
-            totalData={testData.length}
+            totalData={timeSheetData?.meta?.total}
+            totalPayment={timeSheetData?.totalPayment}
             isFetching={isFetching}
             deleteItem={deleteItem}
             setDeleteItem={setDeleteItem}
@@ -240,8 +244,10 @@ const ManageTimeSheet = () => {
           handleApplyFilter={handleApplyFilter}
           sortOrder={sortOrder}
           setSortOrder={setSortOrder}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
         />
       )}
     </>

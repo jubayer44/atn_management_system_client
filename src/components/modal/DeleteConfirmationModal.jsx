@@ -27,10 +27,15 @@ const DeleteConfirmModal = ({
           </h2>
           <div className="flex justify-center space-x-4">
             <button
+              disabled={disabledState}
               onClick={() => {
                 onClose();
               }}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 py-1 px-4 rounded text-sm"
+              className={`bg-gray-300 text-gray-800 py-1 px-4 rounded text-sm ${
+                disabledState
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-gray-400"
+              }`}
             >
               Cancel
             </button>

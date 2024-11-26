@@ -11,17 +11,51 @@ import {
 } from "react-icons/ai";
 import { useEffect, useState } from "react";
 import { parse } from "date-fns";
+import {
+  useGetAllEmployeesQuery,
+  useGetMyProfileQuery,
+} from "../../redux/features/user/userApi";
+import { useLocation } from "react-router-dom";
+import Select from "react-select";
+import { getUserInfo } from "../../services/authServices";
+import { userRole } from "../../utils/constant";
 
 const TripForm = ({
   register = null,
   errors = null,
   control,
   Controller,
-  isLoading = false,
+  useWatch,
   setValue,
   defaultData,
+  selectedUser,
+  setSelectedUser,
 }) => {
   const [imagePreview, setImagePreview] = useState(null);
+  const pathName = useLocation()?.pathname;
+  const role = getUserInfo()?.role;
+  const { data: profileData, isLoading: isUserLoading } =
+    useGetMyProfileQuery();
+
+  const { data: employees, isLoading: isEmployeeLoading } =
+    useGetAllEmployeesQuery({ skip: role !== userRole.admin });
+
+  const userOptions = employees?.data?.length
+    ? employees?.data?.map((user) => ({
+        value: user.id, // assuming each user has a unique 'id'
+        label: user.name, // displaying user name in the select dropdown
+      }))
+    : [];
+
+  const startTime = useWatch({
+    control,
+    name: "tripStartTime", // Watch the tripStartTime field
+  });
+
+  // Set maxTime to the end of the day if startTime is available
+  const maxTime = startTime
+    ? new Date(startTime).setHours(23, 59, 59, 999)
+    : undefined;
 
   const tripData = {
     ...defaultData,
@@ -63,11 +97,19 @@ const TripForm = ({
     }
   }, [tripData?.tripReceipt, setValue]);
 
+  const isNewTripPage = pathName === "/new-trip" || pathName === "/new-trip/";
+  const isNewTripAdmin =
+    pathName === "/new-trip-admin" || pathName === "/new-trip-admin/";
+  const loadingHourlyRate = isNewTripPage && isUserLoading;
+
   return (
     <div className="grid grid-cols-2 gap-4 mb-6">
       <div className="col-span-1">
-        <label htmlFor="memo" className="block text-sm font-medium text-tColor">
-          Trip ID
+        <label
+          htmlFor="tripId"
+          className="block text-sm font-medium text-tColor"
+        >
+          Trip ID <span className="text-red-500 text-base">*</span>
         </label>
 
         <input
@@ -90,15 +132,10 @@ const TripForm = ({
 
       <div className="w-full col-span-1">
         <label htmlFor="date" className="block text-sm font-medium text-tColor">
-          Select Date <span className="text-red-500 text-base">*</span>
+          Date <span className="text-red-500 text-base">*</span>
         </label>
 
         <div className="w-full relative mt-2 flex items-center">
-          {isLoading && (
-            <div className="absolute inset-y-0 right-8 flex items-center pointer-events-none z-10">
-              <Spinner />
-            </div>
-          )}
           <Controller
             control={control}
             name="date"
@@ -137,11 +174,6 @@ const TripForm = ({
         </label>
 
         <div className="w-full relative mt-2 flex items-center">
-          {isLoading && (
-            <div className="absolute inset-y-0 right-8 flex items-center pointer-events-none z-10">
-              <Spinner />
-            </div>
-          )}
           <Controller
             control={control}
             name="tripStartTime"
@@ -154,7 +186,7 @@ const TripForm = ({
                 showTimeSelect
                 showTimeSelectOnly
                 timeFormat="hh:mm aa" // AM/PM format
-                timeIntervals={10} // 15-minute intervals
+                timeIntervals={10} // 10-minute intervals
                 dateFormat="hh:mm aa" // Format the date to show just time (AM/PM)
                 placeholderText="10:00 AM"
                 className={`w-full px-4 py-2 text-tColor bg-white border text-sm border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none hover:border-blue-500`}
@@ -173,6 +205,7 @@ const TripForm = ({
           </span>
         )}
       </div>
+
       {/* Trip End Time with Time Picker (AM/PM format) */}
       <div className="w-full col-span-1">
         <label
@@ -183,29 +216,31 @@ const TripForm = ({
         </label>
 
         <div className="w-full relative mt-2 flex items-center">
-          {isLoading && (
-            <div className="absolute inset-y-0 right-8 flex items-center pointer-events-none z-10">
-              <Spinner />
-            </div>
-          )}
           <Controller
             control={control}
             name="tripEndTime"
             rules={{ required: "Trip End Time is required" }}
             defaultValue={tripData?.tripEndTime}
-            render={({ field }) => (
-              <DatePicker
-                selected={field.value}
-                onChange={(time) => field.onChange(time)}
-                showTimeSelect
-                showTimeSelectOnly
-                timeFormat="hh:mm aa" // AM/PM format
-                timeIntervals={10} // 15-minute intervals
-                dateFormat="hh:mm aa" // Format the date to show just time (AM/PM)
-                placeholderText="12:00 PM"
-                className={`w-full px-4 py-2 text-tColor bg-white border text-sm border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none hover:border-blue-500`}
-              />
-            )}
+            render={({ field }) => {
+              // Calculate the minTime based on the selected start time
+              const minTime = startTime ? new Date(startTime) : undefined;
+
+              return (
+                <DatePicker
+                  selected={field.value}
+                  onChange={(time) => field.onChange(time)}
+                  showTimeSelect
+                  showTimeSelectOnly
+                  timeFormat="hh:mm aa" // AM/PM format
+                  timeIntervals={10} // 10-minute intervals
+                  dateFormat="hh:mm aa" // Format the date to show just time (AM/PM)
+                  placeholderText="12:00 PM"
+                  minTime={minTime} // Disable times before the start time
+                  maxTime={maxTime} // Disable times after the end of the day
+                  className={`w-full px-4 py-2 text-tColor bg-white border text-sm border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none hover:border-blue-500`}
+                />
+              );
+            }}
           />
 
           <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
@@ -219,6 +254,101 @@ const TripForm = ({
           </span>
         )}
       </div>
+
+      {/* Hourly Rate Section */}
+
+      <div className="col-span-2">
+        <label
+          htmlFor="hourlyRate"
+          className="block text-sm font-medium text-tColor"
+        >
+          Hourly Rate <span className="text-red-500 text-base">*</span>
+        </label>
+        {loadingHourlyRate ? (
+          <Spinner />
+        ) : (
+          <div className="relative">
+            <span className="absolute inset-y-0 left-[10px] text-tColor top-[8px] z-10 flex items-center pointer-events-none">
+              $
+            </span>
+            <input
+              type="number"
+              placeholder="20.00"
+              defaultValue={
+                isNewTripPage && !isNewTripAdmin
+                  ? profileData?.data?.hourlyRate
+                  : tripData?.hourlyRate
+              }
+              id="hourlyRate"
+              name="hourlyRate"
+              {...register("hourlyRate", {
+                required: "Hourly Rate is required",
+                min: {
+                  value: 1,
+                  message: "Hourly Rate must be at least `",
+                },
+              })}
+              className={`pl-6 w-full px-4 py-2 mt-2 text-tColor bg-white border text-sm border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none hover:border-blue-500 ${
+                errors.hourlyRate ? "border-red-500" : ""
+              }`}
+            />
+          </div>
+        )}
+        {errors.hourlyRate && (
+          <span className="text-xs text-red-500">
+            {errors.hourlyRate.message}
+          </span>
+        )}
+      </div>
+
+      {/* User Select Section */}
+      {isNewTripAdmin && (
+        <div className="col-span-2">
+          <label
+            htmlFor="userId"
+            className="block text-sm font-medium text-tColor"
+          >
+            Employee <span className="text-red-500 text-base">*</span>
+          </label>
+          <div>
+            <Controller
+              control={control}
+              name="userId" // Make sure the name matches the field name in your form
+              rules={{ required: "Employee is required" }} // Set the field as required
+              defaultValue={selectedUser?.value || ""}
+              render={({ field }) => (
+                <Select
+                  {...field} // Spread field to make the select work with react-hook-form
+                  options={userOptions}
+                  value={userOptions.find(
+                    (option) => option.value === field.value
+                  )} // Map the value to selected option
+                  onChange={(selectedOption) => {
+                    // When a user selects an option, update the field value in the form
+                    field.onChange(selectedOption ? selectedOption.value : "");
+                    setSelectedUser(selectedOption); // Optionally update the selectedUser state
+                  }}
+                  isSearchable={true}
+                  placeholder="Select an Employee"
+                  isLoading={isEmployeeLoading}
+                  className={`w-full mt-2 text-tColor bg-white text-sm border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none hover:border-blue-500`}
+                  styles={{
+                    control: (baseStyles) => ({
+                      ...baseStyles,
+                      borderRadius: "8px",
+                    }),
+                  }}
+                />
+              )}
+            />
+          </div>
+          {errors.userId && (
+            <span className="text-xs text-red-500">
+              {errors.userId.message}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Custom Image Upload Section */}
       <div className="w-full col-span-2">

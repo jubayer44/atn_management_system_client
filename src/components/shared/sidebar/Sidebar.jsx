@@ -12,6 +12,7 @@ import { Link, NavLink } from "react-router-dom";
 import useLogout from "../../../hooks/useLogout";
 // import { getUserInfo } from "../../../services/authServices";
 import { userRole } from "../../../utils/constant";
+import { getUserInfo } from "./../../../services/authServices";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const logout = useLogout();
@@ -23,10 +24,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     setIsOpen(!isOpen);
   };
 
-  // const user = getUserInfo();
-  const user = {
-    role: "user",
-  };
+  const user = getUserInfo();
 
   const navColor =
     "flex items-center p-2 space-x-2 rounded hover:text-primary font-[500] hover:bg-white hover:border-l-4 hover:border-primary text-sm";
@@ -60,7 +58,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         <nav className="flex-1 p-4 space-y-2">
           {user && user?.role === userRole.user && (
             <NavLink
-              to="/"
+              to="/my-time-sheet"
               onClick={() => setIsOpen(false)}
               className={({ isActive }) =>
                 `${navColor} ${
@@ -75,7 +73,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {user && user?.role === userRole.admin && (
             <>
               <NavLink
-                to="/"
+                to="/manage-time-sheet"
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
                   `${navColor} ${

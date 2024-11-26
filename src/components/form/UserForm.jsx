@@ -128,10 +128,9 @@ const UserForm = ({ register, errors, password }) => {
           className="w-full px-4 py-2 mt-2 text-tColor bg-white border text-sm border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none hover:border-blue-500"
         >
           <option value="" disabled>
-            Select Role
+            Role
           </option>
           <option value="user">User</option>
-          <option value="admin">Admin</option>
         </select>
         {errors.role && (
           <span className="text-xs text-red-500">{errors.role.message}</span>
